@@ -12,20 +12,38 @@ def fetchAndSaveData():
     msft = yf.Ticker(ticker)
     msftHist = msft.history(period="max")
 
-    # Filter for 'Open', 'High', 'Low', 'Close' columns only
     selectedColumns = ['Open', 'High', 'Low', 'Close']
     msftHistFiltered = msftHist[selectedColumns]
 
-    # Save the filtered data to JSON
     msftHistFiltered.to_json(DATA_PATH)
 
     return msftHistFiltered
 
 def saveDataFrameToCSV(df, file_name):
-    # Save the DataFrame to a CSV file
-    df.to_csv(file_name, index=True)  # Set index=True to keep the datetime index in the file
+    # Set index=True to keep the datetime index in the file
+    df.to_csv(file_name, index=True)  
     print(f"DataFrame saved to {file_name}")
 
+
+def plotBacktestedData(csv_file, image_file='backtested_plot.png'):
+    df = pd.read_csv(csv_file, parse_dates=[0], index_col=0)
+
+    # Plot the Close and test_close columns
+    plt.figure(figsize=(12, 6))
+    plt.plot(df.index, df['Close'], label='Actual Close', color='blue')
+    plt.plot(df.index, df['test_close'], label='Predicted Close', color='orange')
+
+    # Adding titles and labels
+    plt.title('Actual vs Predicted Closing Prices')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.grid(True)
+
+    #save and show the plot
+    plt.savefig(image_file)
+    print(f"Plot saved as {image_file}")
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -34,7 +52,7 @@ if __name__ == "__main__":
     # Get data from yfinance and save it to a JSON file
     fetchAndSaveData()
     
-    # Create an instance of the RegressionModel
+    # Create an instance of the model
     reg_model = model(DATA_PATH)
     
     # Load and preprocess the data
@@ -48,21 +66,18 @@ if __name__ == "__main__":
     mse = reg_model.evaluate()
     print(f"Mean Squared Error: {mse}\n")
     
-    # Backtest the model to predict closing prices for the data
+    # Backtest the model to predict closing prices for the past data
     df = reg_model.backtest(df)
-    
-    # Save the backtested data to CSV
     saveDataFrameToCSV(df[['Open', 'Close', 'test_close']], "backtested_data.csv")
     
-    # Example of predicting the closing price using standardized features
-    # Create a DataFrame with sample features including new ones (with placeholders for now)
+    # Create a DataFrame with sample features including new ones (with placeholders for testing)
     example_features = pd.DataFrame([[430, 435, 420, 431, 429, 0.002, 1.5]],
                                     columns=['Open', 'High', 'Low', 'Moving_Avg_5', 'Moving_Avg_10', 'Daily_Return', 'Volatility'])
     
     predicted_closing_price = reg_model.predict(example_features)
     print(f"Predicted Closing Price: {predicted_closing_price[0]}\n")
     
-    # Calculate and display the price change
+    
     opening_price = example_features['Open'][0]
     predicted_closing_price_value = predicted_closing_price.item()
     price_change = abs(predicted_closing_price_value - opening_price)
@@ -74,4 +89,5 @@ if __name__ == "__main__":
     else:
         print(f"No price change: Opening Price = {opening_price}, Predicted Closing Price = {predicted_closing_price_value}")
 
-
+    
+    plotBacktestedData('backtested_data.csv', 'backtested_plot.png')

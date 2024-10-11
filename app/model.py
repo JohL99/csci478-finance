@@ -40,7 +40,7 @@ class model():
         return df
     
     def preprocess_data(self, df):
-        # Prepare features including the new ones you've added
+        # Prepare features
         X = df[['Open', 'High', 'Low', 'Moving_Avg_5', 'Moving_Avg_10', 'Daily_Return', 'Volatility']].fillna(0)  # Filling NaN values
         y = df['Close']
 
@@ -56,31 +56,26 @@ class model():
         self.model.fit(self.X_train, self.y_train)
         
     def evaluate(self):
-        # Make predictions and evaluate the model
         y_pred = self.model.predict(self.X_test)
         mse = mean_squared_error(self.y_test, y_pred)
         return mse
     
     def predict(self, new_data):
-        # Ensure new_data matches the features used for training
         new_data_scaled = self.scaler.transform(new_data[['Open', 'High', 'Low', 'Moving_Avg_5', 'Moving_Avg_10', 'Daily_Return', 'Volatility']].fillna(0))
         predicted_closing_price = self.model.predict(new_data_scaled)
         return predicted_closing_price
     
     def backtest(self, df):
         for index, row in df.iterrows():
-            # Predict the closing price based on that day's opening price, high, low, and other features
             opening_price = row['Open']
             high_price = row['High']
             low_price = row['Low']
             
-            # Ensure all features used in training are available for prediction
             moving_avg_5 = row['Moving_Avg_5']
             moving_avg_10 = row['Moving_Avg_10']
             daily_return = row['Daily_Return']
             volatility = row['Volatility']
 
-            # Prepare the new data as a DataFrame with all required features
             new_data = pd.DataFrame([[opening_price, high_price, low_price, moving_avg_5, moving_avg_10, daily_return, volatility]],
                                     columns=['Open', 'High', 'Low', 'Moving_Avg_5', 'Moving_Avg_10', 'Daily_Return', 'Volatility']).fillna(0)
 

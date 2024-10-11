@@ -73,18 +73,15 @@ class model():
     
     def backtest(self, df):
         for index, row in df.iterrows():
-            # Predict the closing price based on that day's opening price, high, low, and other features
             opening_price = row['Open']
             high_price = row['High']
             low_price = row['Low']
             
-            # Ensure all features used in training are available for prediction
             moving_avg_5 = row['Moving_Avg_5']
             moving_avg_10 = row['Moving_Avg_10']
             daily_return = row['Daily_Return']
             volatility = row['Volatility']
 
-            # Prepare the new data as a DataFrame with all required features
             new_data = pd.DataFrame([[opening_price, high_price, low_price, moving_avg_5, moving_avg_10, daily_return, volatility]],
                                     columns=['Open', 'High', 'Low', 'Moving_Avg_5', 'Moving_Avg_10', 'Daily_Return', 'Volatility']).fillna(0)
 

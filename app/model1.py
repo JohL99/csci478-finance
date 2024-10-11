@@ -1,5 +1,5 @@
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor  # Importing RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
 
@@ -12,7 +12,7 @@ class model():
     
     def __init__(self, data_path):
         self.data_path = data_path
-        self.model = RandomForestRegressor(n_estimators=100, random_state=42)  # Use RandomForestRegressor
+        self.model = LinearRegression()
         self.scaler = StandardScaler()
         self.X_train = None
         self.X_test = None
@@ -51,15 +51,19 @@ class model():
         self.X_train = self.scaler.fit_transform(self.X_train)
         self.X_test = self.scaler.transform(self.X_test)
 
+        
+        
     def train(self):
         # Train the model
         self.model.fit(self.X_train, self.y_train)
+        
         
     def evaluate(self):
         # Make predictions and evaluate the model
         y_pred = self.model.predict(self.X_test)
         mse = mean_squared_error(self.y_test, y_pred)
         return mse
+    
     
     def predict(self, new_data):
         # Ensure new_data matches the features used for training
@@ -91,3 +95,6 @@ class model():
             df.at[index, 'test_close'] = predicted_close[0]  # Insert the predicted value
 
         return df
+
+        
+    
